@@ -33,11 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $query->execute();
 
       // Construir el enlace para restablecer la contraseña
-      $resetLink = "https://example.com/reset_password.php?token=$token";
+      $resetLink = "https://example.com/ResetPassword.php?token=$token";
 
       // Redireccionar a la página de restablecimiento de contraseña
       $_SESSION['reset_link'] = $resetLink;
-      header('Location: reset_password.php');
+      header('Location: ResetPassword.php');
       exit();
     } else {
       // Código a ejecutar si no se encontró ningún usuario con el correo electrónico proporcionado
