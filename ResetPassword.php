@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $confirmPassword = $_POST['confirm_password'];
 
   // Verificar si el token es válido y aún no ha caducado
-  $query = $conn->prepare('SELECT id, reset_token_expires FROM users WHERE reset_token = :token AND reset_token_expires > NOW()');
+  $query = $conn->prepare('SELECT id FROM users WHERE reset_token = :token AND reset_token_expires > NOW()');
   $query->bindParam(':token', $token);
   $query->execute();
   $user = $query->fetch(PDO::FETCH_ASSOC);
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: login.php');
     exit();
   } else {
-    $_SESSION['error'] = 'El token no es válido o ha caducado.';
+    $_SESSION['error'] = 'El token no es válido';
     header('Location: ResetPassword.php?token=' . $token);
     exit();
   }
@@ -40,25 +40,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
   <?php if (isset($_SESSION['error'])): ?>
-    <div class="error-message"><?php echo $_SESSION['error']; ?></div>
+    <script>alert("Error: <?php echo $_SESSION['error']; ?>");</script>
     <?php unset($_SESSION['error']); ?>
   <?php endif; ?>
 
-  <?php if (isset($_SESSION['message'])): ?>
-    <div class="success-message"><?php echo $_SESSION['message']; ?></div>
-    <?php unset($_SESSION['message']); ?>
-  <?php endif; ?>
-
   <h2>Reset Password</h2>
-  <form method="post">
-    <input type="hidden" name="token" value="<?php echo isset($_GET['token']) ? $_GET['token'] : ''; ?>">
-    <label for="password">Nueva contraseña:</label>
-    <input type="password" name="password" id="password" required>
-    <br>
-    <label for="confirm_password">Confirmar contraseña:</label>
-    <input type="password" name="confirm_password" id="confirm_password" required>
-    <br>
-    <input type="submit" value="Restablecer contraseña">
-  </form>
+
+  <?php if (empty($_GET['token'])): ?>
+    <p>Error: Token inválido o faltante</p>
+  <?php else: ?>
+    <p>Valor del token: <?php echo $_GET['token']; ?></p>
+
+    <form method="post">
+      <input type="hidden" name="token" value="<?php echo $_GET['token']; ?>">
+      <label for="password">Nueva contraseña:</label>
+      <input type="password" name="password" id="password" required>
+      <br>
+      <label for="confirm_password">Confirmar contraseña:</label>
+      <input type="password" name="confirm_password" id="confirm_password" required>
+      <?php if (isset($_SESSION['error']) && $_SESSION['error'] === 'Contraseña no coincide.'): ?>
+        <script>alert("Contraseña no coincide.");</script>
+      <?php endif; ?>
+      <br>
+      <input type="submit" value="Restablecer contraseña">
+    </form>
+  <?php endif; ?>
 </body>
 </html>
